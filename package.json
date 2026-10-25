@@ -1,0 +1,14 @@
+{
+  "name": "commandes-it-volunteers",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Prise de commandes de repas - journée d'intégration I Meet You 2026",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": { "node": ">=18" },
+  "dependencies": {
+    "@upstash/redis": "^1.34.0",
+    "exceljs": "^4.4.0"
+  }
+}

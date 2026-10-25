@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Commande de repas · I Meet You 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap">
+<style>
+  :root { --navy:#141A52; --blue:#2B3F94; --lime:#B5DA3A; --gray:#E3E6E9; --muted:#5B628F; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:'Montserrat',system-ui,sans-serif; background:var(--gray); color:var(--navy); }
+  header { background:var(--navy); color:#fff; padding:40px 20px 56px; text-align:center; border-radius:0 0 40px 40px; }
+  header small { display:block; color:var(--lime); font-weight:700; letter-spacing:.2em; font-size:12px; }
+  header h1 { margin:10px 0 6px; font-size:34px; line-height:1.1; }
+  header p { margin:0; color:#C9CFEE; font-size:15px; }
+  main { max-width:560px; margin:-32px auto 48px; padding:0 16px; }
+  .card { background:#fff; border-radius:24px; padding:24px; box-shadow:0 10px 30px rgba(20,26,82,.12); }
+  label { display:block; font-weight:600; font-size:14px; margin:0 0 6px; }
+  input[type=text] { width:100%; font:inherit; font-size:16px; padding:14px 16px; border:2px solid #D5DAE6; border-radius:14px; color:var(--navy); }
+  input[type=text]:focus { outline:none; border-color:var(--blue); }
+  select { width:100%; font:inherit; font-size:16px; padding:14px 16px; border:2px solid #D5DAE6; border-radius:14px; color:var(--navy); background:#fff; }
+  select:focus { outline:none; border-color:var(--blue); }
+  .notice { background:#FFF3CD; border-radius:12px; padding:10px 14px; font-size:13px; font-weight:600; margin-top:8px; }
+  .field { margin-bottom:18px; }
+  h2 { font-size:13px; letter-spacing:.16em; color:var(--blue); margin:26px 0 12px; }
+  .dish { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:14px 0; border-top:1px solid #E5E8F0; }
+  .dish:first-of-type { border-top:0; }
+  .dish b { font-size:16px; line-height:1.25; }
+  .dish span { display:block; color:var(--muted); font-size:13px; margin-top:2px; }
+  .qty { display:flex; align-items:center; gap:10px; flex-shrink:0; }
+  .qty button { width:44px; height:44px; border-radius:50%; border:0; background:var(--navy); color:#fff; font-size:22px; font-weight:700; cursor:pointer; }
+  .qty button:disabled { background:#C5CAE0; cursor:default; }
+  .qty output { min-width:26px; text-align:center; font-weight:800; font-size:20px; }
+  .total { margin-top:22px; background:var(--lime); border-radius:18px; padding:16px 20px; display:flex; justify-content:space-between; align-items:center; font-weight:700; }
+  .total strong { font-size:28px; font-weight:800; }
+  .submit { width:100%; margin-top:18px; padding:18px; border:0; border-radius:16px; background:var(--navy); color:#fff; font:inherit; font-weight:800; font-size:17px; cursor:pointer; }
+  .submit:disabled { opacity:.5; cursor:default; }
+  .error { color:#B3261E; font-weight:600; font-size:14px; margin-top:14px; min-height:20px; }
+  .hp { position:absolute; left:-9999px; }
+  .done { text-align:center; }
+  .done .ref { display:inline-block; background:var(--lime); border-radius:14px; padding:10px 22px; font-size:28px; font-weight:800; margin:12px 0; }
+  .done ul { list-style:none; padding:0; margin:16px 0; text-align:left; }
+  .done li { padding:8px 0; border-top:1px solid #E5E8F0; }
+  .info { text-align:center; color:var(--muted); font-size:13px; margin-top:18px; }
+  [hidden] { display:none !important; }
+</style>
+</head>
+<body>
+<header>
+  <small>I MEET YOU 2026 · 07 NOVEMBRE · ANKOUNA BY PASS</small>
+  <h1>Commande ton repas</h1>
+  <p>Tous les plats à 10.000 Ar sur commande</p>
+</header>
+
+<main>
+  <form id="form" class="card" novalidate>
+    <div class="field">
+      <label for="nom">Nom et prénoms</label>
+      <input id="nom" type="text" autocomplete="name" placeholder="RAKOTO Jean Marc" maxlength="100" required>
+    </div>
+    <div class="field">
+      <label for="etu">Numéro ETU (4 chiffres)</label>
+      <input id="etu" type="text" inputmode="numeric" pattern="[0-9]{4}" placeholder="4567" maxlength="4" required>
+    </div>
+    <div class="field">
+      <label for="classe">Classe</label>
+      <select id="classe" required><option value="">— Choisis ta classe —</option></select>
+      <div id="otherNote" class="notice" hidden>Si ta classe n'est pas dans la liste, le paiement se fait obligatoirement par Orange Money.</div>
+    </div>
+    <div class="field">
+      <label for="contact">Contact (numéro de téléphone)</label>
+      <input id="contact" type="text" inputmode="tel" autocomplete="tel" placeholder="034 00 000 00" maxlength="25" required>
+    </div>
+    <input class="hp" id="website" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+    <h2>TES PLATS</h2>
+    <div id="dishes"></div>
+
+    <div class="total"><span>Total à payer</span><strong id="total">0 Ar</strong></div>
+    <div id="error" class="error" role="alert"></div>
+    <button id="send" class="submit" type="submit">Valider ma commande</button>
+  </form>
+
+  <section id="done" class="card done" hidden>
+    <div style="font-size:42px">✅</div>
+    <h2 style="margin:6px 0">COMMANDE ENREGISTRÉE</h2>
+    <div>Ta référence</div>
+    <div class="ref" id="ref"></div>
+    <ul id="recap"></ul>
+    <div style="font-size:20px">Total à payer : <strong id="doneTotal"></strong></div>
+    <p class="info">Garde cette référence, elle te sera demandée lors du paiement et de la remise de ton repas.</p>
+    <p class="info" id="omOnly" hidden><strong>Ta classe étant « Autre », le paiement par Orange Money est obligatoire.</strong></p>
+    <p class="info">Si tu paies par Mobile Money, envoie le montant au <a href="tel:+261373505856">+261373505856</a> avec comme motif : <strong>ITV <span id="paymentRef"></span></strong>.</p>
+  </section>
+
+  <p id="closed" class="card" hidden style="text-align:center;font-weight:700">Les commandes sont closes. Tu pourras prendre ton repas sur place (12.000 Ar).</p>
+</main>
+
+<script>
+const fmt = (n) => n.toLocaleString('fr-FR').replace(/[  ]/g, '.') + ' Ar';
+const $ = (id) => document.getElementById(id);
+let menu = null;
+const qty = {};
+
+function render() {
+  const sum = menu.dishes.reduce((s, d) => s + qty[d.id], 0);
+  $('total').textContent = fmt(sum * menu.price);
+  for (const d of menu.dishes) {
+    $('q-' + d.id).textContent = qty[d.id];
+    $('m-' + d.id).disabled = qty[d.id] === 0;
+    $('p-' + d.id).disabled = qty[d.id] >= 20;
+  }
+}
+
+function build() {
+  const box = $('dishes');
+  for (const d of menu.dishes) {
+    qty[d.id] = 0;
+    const row = document.createElement('div');
+    row.className = 'dish';
+    const txt = document.createElement('div');
+    const b = document.createElement('b'); b.textContent = d.name;
+    const s = document.createElement('span'); s.textContent = fmt(menu.price) + ' l\'unité';
+    txt.append(b, s);
+    const ctl = document.createElement('div'); ctl.className = 'qty';
+    const minus = document.createElement('button'); minus.type = 'button'; minus.id = 'm-' + d.id; minus.textContent = '−'; minus.setAttribute('aria-label', 'Retirer ' + d.name);
+    const out = document.createElement('output'); out.id = 'q-' + d.id;
+    const plus = document.createElement('button'); plus.type = 'button'; plus.id = 'p-' + d.id; plus.textContent = '+'; plus.setAttribute('aria-label', 'Ajouter ' + d.name);
+    minus.onclick = () => { qty[d.id] = Math.max(0, qty[d.id] - 1); render(); };
+    plus.onclick = () => { qty[d.id] = Math.min(20, qty[d.id] + 1); render(); };
+    ctl.append(minus, out, plus);
+    row.append(txt, ctl);
+    box.append(row);
+  }
+  render();
+}
+
+$('form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  $('error').textContent = '';
+  const items = menu.dishes.map((d) => ({ id: d.id, qty: qty[d.id] }));
+  $('send').disabled = true;
+  try {
+    const r = await fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nom: $('nom').value, etu: $('etu').value, classe: $('classe').value, contact: $('contact').value, items, website: $('website').value }),
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || 'Erreur');
+    $('ref').textContent = data.ref;
+    $('paymentRef').textContent = data.ref;
+    $('doneTotal').textContent = fmt(data.total);
+    $('omOnly').hidden = !data.orangeMoneyOnly;
+    const ul = $('recap');
+    for (const d of menu.dishes) {
+      if (!qty[d.id]) continue;
+      const li = document.createElement('li');
+      li.textContent = qty[d.id] + ' × ' + d.name;
+      ul.append(li);
+    }
+    $('form').hidden = true;
+    $('done').hidden = false;
+    window.scrollTo(0, 0);
+  } catch (err) {
+    $('error').textContent = err.message;
+    $('send').disabled = false;
+  }
+});
+
+fetch('/api/menu').then((r) => r.json()).then((m) => {
+  menu = m;
+  if (m.closed) { $('form').hidden = true; $('closed').hidden = false; return; }
+  for (const c of [...m.classes, m.otherClass]) {
+    const o = document.createElement('option'); o.value = c; o.textContent = c;
+    $('classe').append(o);
+  }
+  $('classe').onchange = () => { $('otherNote').hidden = $('classe').value !== m.otherClass; };
+  build();
+}).catch(() => { $('error').textContent = 'Impossible de charger le menu. Recharge la page.'; });
+</script>
+</body>
+</html>

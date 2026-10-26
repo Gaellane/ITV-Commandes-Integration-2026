@@ -36,6 +36,14 @@
   .badge.ok { background:var(--lime); color:var(--navy); }
   .badge.wait { background:#FFF3CD; color:#7A5B00; }
   .err { color:#B3261E; font-weight:600; margin-top:10px; min-height:20px; }
+  .overlay { position:fixed; inset:0; background:rgba(20,26,82,.75); display:flex; align-items:center; justify-content:center; padding:16px; z-index:100; }
+  .dialog { background:#fff; border-radius:20px; border-top:8px solid #B3261E; padding:28px 24px; max-width:440px; width:100%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,.4); }
+  .dialog .icon { font-size:48px; line-height:1; }
+  .dialog h2 { margin:10px 0; font-size:22px; color:#B3261E; }
+  .dialog p { margin:8px 0; font-size:15px; }
+  .dialog .hint { color:var(--muted); font-size:13px; margin-bottom:16px; }
+  button.danger { background:#B3261E; }
+  button:disabled { opacity:.6; cursor:wait; }
   [hidden] { display:none !important; }
 </style>
 </head>
@@ -71,6 +79,20 @@
         <thead><tr><th>RÉF</th><th>DATE</th><th>NOM ET PRÉNOMS</th><th>ETU</th><th>CLASSE</th><th>CONTACT</th><th>PLATS</th><th style="text-align:right">TOTAL</th><th>STATUT</th><th></th></tr></thead>
         <tbody id="rows"></tbody>
       </table>
+    </div>
+  </div>
+</div>
+
+<div id="modal" class="overlay" role="alertdialog" aria-modal="true" aria-labelledby="modal-title" hidden>
+  <div class="dialog">
+    <div class="icon">⚠️</div>
+    <h2 id="modal-title">Supprimer toutes les commandes ?</h2>
+    <p><b id="modal-count"></b> vont être <b>définitivement supprimées</b>. Cette action est irréversible.</p>
+    <p class="hint">Pense à télécharger l'Excel avant si tu veux les garder.</p>
+    <button id="modal-dl" class="lime" style="width:100%;margin-bottom:10px">Télécharger l'Excel d'abord</button>
+    <div class="row" style="justify-content:center">
+      <button id="modal-cancel">Annuler</button>
+      <button id="modal-ok" class="danger">Oui, tout supprimer</button>
     </div>
   </div>
 </div>
@@ -189,9 +211,21 @@ $('dl').onclick = async () => {
     URL.revokeObjectURL(a.href);
   } catch (e) { alert(e.message); }
 };
-$('wipe').onclick = async () => {
-  if (!confirm("Effacer TOUTES les commandes ? Télécharge d'abord l'Excel si tu veux les garder.")) return;
-  try { await api('/api/orders', 'DELETE'); await load(); } catch (e) { alert(e.message); }
+$('wipe').onclick = () => {
+  $('modal-count').textContent = loadedOrders.length + ' commande' + (loadedOrders.length > 1 ? 's' : '');
+  $('modal').hidden = false;
+  $('modal-cancel').focus();
+};
+const closeModal = () => { $('modal').hidden = true; };
+$('modal-cancel').onclick = closeModal;
+$('modal').addEventListener('click', (e) => { if (e.target === $('modal')) closeModal(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('modal').hidden) closeModal(); });
+$('modal-dl').onclick = $('dl').onclick;
+$('modal-ok').onclick = async () => {
+  $('modal-ok').disabled = true;
+  try { await api('/api/orders', 'DELETE'); closeModal(); await load(); }
+  catch (e) { alert(e.message); }
+  $('modal-ok').disabled = false;
 };
 </script>
 </body>

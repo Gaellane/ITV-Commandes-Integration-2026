@@ -81,6 +81,10 @@ module.exports = async (req, res) => {
     return res.status(405).json({ error: 'Méthode non autorisée.' });
   } catch (err) {
     console.error(err);
+    if (err && err.code === 'NO_DB') {
+      console.error('Base Redis non connectée : Vercel > Storage > Upstash Redis > Connect to Project, puis Redeploy.');
+      return res.status(500).json({ error: 'Base de données non connectée (Vercel > Storage > Upstash Redis), puis Redeploy.' });
+    }
     return res.status(500).json({ error: 'Erreur serveur, réessaie dans un instant.' });
   }
 };

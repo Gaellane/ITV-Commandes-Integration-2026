@@ -1,6 +1,6 @@
 const { PRICE, DISHES, CLASSES, OTHER_CLASS } = require('../lib/menu');
 const { addOrder, listOrders, clearOrders, setConfirmed } = require('../lib/store');
-const { isAdmin } = require('../lib/auth');
+const { isAdmin, canViewList } = require('../lib/auth');
 
 const clean = (s, max) => String(s == null ? '' : s).replace(/\s+/g, ' ').trim().slice(0, max);
 
@@ -48,8 +48,9 @@ module.exports = async (req, res) => {
       return res.status(201).json({ ok: true, ref: order.ref, total, orangeMoneyOnly: classe === OTHER_CLASS });
     }
 
-    // --- Consultation publique (lecture seule, sans le numéro de téléphone) ---
+    // --- Consultation protégée par LIST_PASSWORD (lecture seule, sans le numéro de téléphone) ---
     if (req.method === 'GET' && req.query && req.query.view === 'public') {
+      if (!canViewList(req)) return res.status(401).json({ error: 'Mot de passe incorrect.' });
       const orders = (await listOrders()).reverse().map(({ contact, ...o }) => o);
       return res.status(200).json({ orders });
     }

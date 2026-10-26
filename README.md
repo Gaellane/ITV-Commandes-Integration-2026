@@ -24,6 +24,8 @@ Les commandes sont enregistrées dans le dossier `data/` :
   Si ce fichier est ouvert dans Excel, Windows le verrouille : la commande est quand même enregistrée,
   et tu peux toujours télécharger un Excel à jour depuis la page admin.
 
+La liste de consultation `/commandes.html` est protégée par `LIST_PASSWORD` (dans `.env`, ou dans les Environment Variables sur Vercel).
+
 Changer le mot de passe : modifie `ADMIN_PASSWORD` dans le fichier `.env` (jamais commité) puis relance `npm start`.
 
 Pour tester depuis un téléphone connecté au même Wi-Fi : remplace `localhost` par l'adresse IP de ton ordinateur

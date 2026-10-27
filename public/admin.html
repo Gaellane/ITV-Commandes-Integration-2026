@@ -185,6 +185,19 @@ function renderOrders() {
       };
       act.append(btn);
     }
+    const del = document.createElement('button');
+    del.className = 'small';
+    del.style.cssText = 'background:#fff;color:#B3261E;border:2px solid #B3261E;margin-left:6px';
+    del.textContent = 'Supprimer';
+    del.onclick = async () => {
+      if (!confirm('Supprimer définitivement la commande ' + o.ref + ' de ' + o.nom + ' ?')) return;
+      del.disabled = true;
+      try {
+        await api('/api/orders?ref=' + encodeURIComponent(o.ref), 'DELETE');
+        await load();
+      } catch (e) { alert(e.message); del.disabled = false; }
+    };
+    act.append(del);
     tr.append(st, act);
     tb.append(tr);
   }

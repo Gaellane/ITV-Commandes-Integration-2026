@@ -48,7 +48,7 @@
   </div>
   <div class="card scroll">
     <table>
-      <thead><tr><th>RÉF</th><th>DATE</th><th>NOM ET PRÉNOMS</th><th>ETU</th><th>CLASSE</th><th>PLATS</th><th style="text-align:right">TOTAL</th><th>STATUT</th></tr></thead>
+      <thead><tr><th>RÉF</th><th>DATE</th><th>NOM ET PRÉNOMS</th><th>ETU</th><th>CLASSE</th><th>CONTACT</th><th>PLATS</th><th style="text-align:right">TOTAL</th><th>STATUT</th></tr></thead>
       <tbody id="rows"></tbody>
     </table>
   </div>
@@ -64,16 +64,16 @@ let key = ''; // gardé en mémoire seulement : recharger la page redemande le m
 
 function draw() {
   const q = $('q').value.trim().toLowerCase();
-  const shown = orders.filter((o) => !q || [o.ref, o.nom, o.etu, o.classe].some((v) => String(v || '').toLowerCase().includes(q)));
+  const shown = orders.filter((o) => !q || [o.ref, o.nom, o.etu, o.classe, o.contact].some((v) => String(v || '').toLowerCase().includes(q)));
   $('count').textContent = shown.length + ' commande' + (shown.length > 1 ? 's' : '');
   const tb = $('rows'); tb.replaceChildren();
   for (const o of shown) {
     const tr = document.createElement('tr');
-    const cells = [o.ref, dateFmt.format(new Date(o.createdAt)), o.nom, o.etu, o.classe || '', o.items.map((i) => i.qty + '× ' + i.name).join(', '), fmt(o.total)];
+    const cells = [o.ref, dateFmt.format(new Date(o.createdAt)), o.nom, o.etu, o.classe || '', o.contact || '', o.items.map((i) => i.qty + '× ' + i.name).join(', '), fmt(o.total)];
     cells.forEach((c, idx) => {
       const td = document.createElement('td');
       td.textContent = c; // textContent : jamais interprété comme du HTML
-      if (idx === 6) td.className = 'num';
+      if (idx === 7) td.className = 'num';
       tr.append(td);
     });
     const st = document.createElement('td');

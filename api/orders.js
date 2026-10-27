@@ -1,5 +1,5 @@
 const { PRICE, DISHES, CLASSES, OTHER_CLASS } = require('../lib/menu');
-const { addOrder, listOrders, clearOrders, setConfirmed } = require('../lib/store');
+const { addOrder, listOrders, clearOrders, setConfirmed, deleteOrder } = require('../lib/store');
 const { isAdmin, canViewList } = require('../lib/auth');
 
 const clean = (s, max) => String(s == null ? '' : s).replace(/\s+/g, ' ').trim().slice(0, max);
@@ -48,10 +48,10 @@ module.exports = async (req, res) => {
       return res.status(201).json({ ok: true, ref: order.ref, total, orangeMoneyOnly: classe === OTHER_CLASS });
     }
 
-    // --- Consultation protégée par LIST_PASSWORD (lecture seule, sans le numéro de téléphone) ---
+    // --- Consultation protégée par LIST_PASSWORD (lecture seule, contact inclus) ---
     if (req.method === 'GET' && req.query && req.query.view === 'public') {
       if (!canViewList(req)) return res.status(401).json({ error: 'Mot de passe incorrect.' });
-      const orders = (await listOrders()).reverse().map(({ contact, ...o }) => o);
+      const orders = (await listOrders()).reverse();
       return res.status(200).json({ orders });
     }
 
@@ -71,9 +71,15 @@ module.exports = async (req, res) => {
       return res.status(200).json({ ok: true, order });
     }
 
-    // --- Effacer toutes les commandes (admin) : utile pour vider les commandes de test ---
+    // --- Supprimer une commande (?ref=CMD-001) ou, sans ref, toutes (admin) : utile pour vider les tests ---
     if (req.method === 'DELETE') {
       if (!isAdmin(req)) return res.status(401).json({ error: 'Mot de passe incorrect.' });
+      const ref = clean(req.query && req.query.ref, 20);
+      if (ref) {
+        const found = await deleteOrder(ref);
+        if (!found) return res.status(404).json({ error: 'Commande introuvable.' });
+        return res.status(200).json({ ok: true });
+      }
       await clearOrders();
       return res.status(200).json({ ok: true });
     }

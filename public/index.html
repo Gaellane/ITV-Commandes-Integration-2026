@@ -103,13 +103,15 @@ const $ = (id) => document.getElementById(id);
 let menu = null;
 const qty = {};
 
+const total = () => menu.dishes.reduce((s, d) => s + qty[d.id], 0);
+
 function render() {
-  const sum = menu.dishes.reduce((s, d) => s + qty[d.id], 0);
+  const sum = total();
   $('total').textContent = fmt(sum * menu.price);
   for (const d of menu.dishes) {
     $('q-' + d.id).textContent = qty[d.id];
     $('m-' + d.id).disabled = qty[d.id] === 0;
-    $('p-' + d.id).disabled = qty[d.id] >= 20;
+    $('p-' + d.id).disabled = sum >= 19;
   }
 }
 
@@ -128,7 +130,7 @@ function build() {
     const out = document.createElement('output'); out.id = 'q-' + d.id;
     const plus = document.createElement('button'); plus.type = 'button'; plus.id = 'p-' + d.id; plus.textContent = '+'; plus.setAttribute('aria-label', 'Ajouter ' + d.name);
     minus.onclick = () => { qty[d.id] = Math.max(0, qty[d.id] - 1); render(); };
-    plus.onclick = () => { qty[d.id] = Math.min(20, qty[d.id] + 1); render(); };
+    plus.onclick = () => { if (total() < 19) qty[d.id]++; render(); };
     ctl.append(minus, out, plus);
     row.append(txt, ctl);
     box.append(row);
@@ -139,6 +141,9 @@ function build() {
 $('form').addEventListener('submit', async (e) => {
   e.preventDefault();
   $('error').textContent = '';
+  const etuNum = Number($('etu').value);
+  if (!(etuNum > 3100 && etuNum < 6000)) { $('error').textContent = 'Numéro ETU invalide : il doit être compris entre 3100 et 6000 (exclus).'; return; }
+  if (total() >= 20) { $('error').textContent = 'Une commande doit comporter moins de 20 plats au total.'; return; }
   const items = menu.dishes.map((d) => ({ id: d.id, qty: qty[d.id] }));
   $('send').disabled = true;
   try {

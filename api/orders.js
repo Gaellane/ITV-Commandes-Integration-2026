@@ -22,6 +22,9 @@ module.exports = async (req, res) => {
       if (!/^[0-9]{4}$/.test(etu)) {
         return res.status(400).json({ error: 'Le numéro ETU doit comporter 4 chiffres.' });
       }
+      if (Number(etu) <= 3100 || Number(etu) >= 6000) {
+        return res.status(400).json({ error: 'Numéro ETU invalide : il doit être compris entre 3100 et 6000 (exclus).' });
+      }
       const classe = clean(b.classe, 20);
       if (![...CLASSES, OTHER_CLASS].includes(classe)) {
         return res.status(400).json({ error: 'Choisis ta classe.' });
@@ -41,6 +44,9 @@ module.exports = async (req, res) => {
         if (qty > 0) items.push({ id: d.id, name: d.name, qty });
       }
       if (!items.length) return res.status(400).json({ error: 'Choisis au moins un plat.' });
+      if (items.reduce((n, i) => n + i.qty, 0) >= 20) {
+        return res.status(400).json({ error: 'Trop de plats : une commande doit comporter moins de 20 plats au total.' });
+      }
 
       // Le total est toujours recalculé côté serveur.
       const total = items.reduce((sum, i) => sum + i.qty * PRICE, 0);
